@@ -49,8 +49,9 @@ const verufyToken = async (req, res, next) => {
 
 async function run() {
     try {
-        const database = client.db("carDoctorDB");
+        const database = client.db("jobsDB");
 
+        //get token when user logs in
         app.post("/api/auth/jwt", async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -62,6 +63,23 @@ async function run() {
                 sameSite: "none",
             });
             res.send({ success: true });
+        });
+
+        //delete token when user logs out
+        app.post("/api/auth/logout", async (req, res) => {
+            await res.clearCookie("token", {
+                maxAge: 0,
+            });
+            res.send({ success: true });
+        });
+
+        //get all job categories
+        app.get("/api/jobs/categories", async (req, res) => {
+            const categories = await database
+                .collection("jobCategories")
+                .find({})
+                .toArray();
+            res.send(categories);
         });
 
         await client.db("admin").command({ ping: 1 });

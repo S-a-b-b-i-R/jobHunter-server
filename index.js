@@ -11,6 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(
     cors({
         origin: [
+            "http://localhost:5173",
             "https://car-doctor-819e5.web.app",
             "https://car-doctor-819e5.firebaseapp.com",
         ],
@@ -49,6 +50,19 @@ const verufyToken = async (req, res, next) => {
 async function run() {
     try {
         const database = client.db("carDoctorDB");
+
+        app.post("/api/auth/jwt", async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: "1h",
+            });
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            });
+            res.send({ success: true });
+        });
 
         await client.db("admin").command({ ping: 1 });
         console.log(

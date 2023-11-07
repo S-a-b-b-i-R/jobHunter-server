@@ -153,6 +153,20 @@ async function run() {
             res.send(result);
         });
 
+        //check if a user already applied for a job by using userId and jobId
+        app.get("/api/user/jobs/:userId/:jobId", async (req, res) => {
+            const userId = req.params.userId;
+            const jobId = req.params.jobId;
+            const userJob = await database
+                .collection("userJobsCollection")
+                .findOne({ userId: userId, appJob: jobId });
+            if (userJob) {
+                res.send(true);
+            } else {
+                res.send(false);
+            }
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"

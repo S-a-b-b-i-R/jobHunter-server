@@ -122,7 +122,6 @@ async function run() {
         //get job detail by id
         app.get("/api/job/:id", async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const job = await database
                 .collection("jobsCollection")
                 .findOne({ _id: new ObjectId(id) });
@@ -135,6 +134,22 @@ async function run() {
             const result = await database
                 .collection("userJobsCollection")
                 .insertOne(userJob);
+            //add 1 to the applicantsNumber of the job in jobsCollection
+            const job = await database
+                .collection("jobsCollection")
+                .findOne({ _id: new ObjectId(userJob.appJob) });
+            const applicantsNumber = job.applicantsNumber + 1;
+            try {
+                await database
+                    .collection("jobsCollection")
+                    .updateOne(
+                        { _id: new ObjectId(userJob.appJob) },
+                        { $set: { applicantsNumber: applicantsNumber } }
+                    );
+            } catch (error) {
+                console.log(error);
+            }
+
             res.send(result);
         });
 

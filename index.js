@@ -119,6 +119,16 @@ async function run() {
             }
         });
 
+        //get job detail by id
+        app.get("/api/job/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const job = await database
+                .collection("jobsCollection")
+                .findOne({ _id: new ObjectId(id) });
+            res.send(job);
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"

@@ -92,6 +92,33 @@ async function run() {
             res.send(result);
         });
 
+        //get all jobs
+        app.get("/api/jobs", async (req, res) => {
+            const jobs = await database
+                .collection("jobsCollection")
+                .find({})
+                .toArray();
+            res.send(jobs);
+        });
+
+        //get jobs by category id, if category id is not given, will return all jobs
+        app.get("/api/jobs/:categoryId?", async (req, res) => {
+            const categoryId = req.params.categoryId;
+            if (categoryId) {
+                const jobs = await database
+                    .collection("jobsCollection")
+                    .find({ jobCategoryId: categoryId })
+                    .toArray();
+                res.send(jobs);
+            } else {
+                const jobs = await database
+                    .collection("jobsCollection")
+                    .find({})
+                    .toArray();
+                res.send(jobs);
+            }
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"

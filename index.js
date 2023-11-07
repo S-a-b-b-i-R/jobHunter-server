@@ -51,7 +51,6 @@ async function run() {
     try {
         const database = client.db("jobsDB");
 
-        //get token when user logs in
         app.post("/api/auth/jwt", async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -65,7 +64,6 @@ async function run() {
             res.send({ success: true });
         });
 
-        //delete token when user logs out
         app.post("/api/auth/logout", async (req, res) => {
             await res.clearCookie("token", {
                 maxAge: 0,
@@ -73,7 +71,6 @@ async function run() {
             res.send({ success: true });
         });
 
-        //get all job categories
         app.get("/api/jobs/categories", async (req, res) => {
             const categories = await database
                 .collection("jobCategories")
@@ -82,7 +79,6 @@ async function run() {
             res.send(categories);
         });
 
-        //post job
         app.post("/api/jobs", verufyToken, async (req, res) => {
             const job = req.body;
             //change job keys
@@ -92,7 +88,6 @@ async function run() {
             res.send(result);
         });
 
-        //get all jobs
         app.get("/api/jobs", async (req, res) => {
             const jobs = await database
                 .collection("jobsCollection")
@@ -101,7 +96,6 @@ async function run() {
             res.send(jobs);
         });
 
-        //get jobs by category id, if category id is not given, will return all jobs
         app.get("/api/jobs/:categoryId?", async (req, res) => {
             const categoryId = req.params.categoryId;
             if (categoryId) {
@@ -119,7 +113,6 @@ async function run() {
             }
         });
 
-        //get job detail by id
         app.get("/api/job/:id", async (req, res) => {
             const id = req.params.id;
             const job = await database
@@ -128,13 +121,11 @@ async function run() {
             res.send(job);
         });
 
-        //add user applied job
         app.post("/api/user/jobs", verufyToken, async (req, res) => {
             const userJob = req.body;
             const result = await database
                 .collection("userJobsCollection")
                 .insertOne(userJob);
-            //add 1 to the applicantsNumber of the job in jobsCollection
             const job = await database
                 .collection("jobsCollection")
                 .findOne({ _id: new ObjectId(userJob.appJob) });
@@ -153,7 +144,6 @@ async function run() {
             res.send(result);
         });
 
-        //check if a user already applied for a job by using userId and jobId
         app.get("/api/user/jobs/:userId/:jobId", async (req, res) => {
             const userId = req.params.userId;
             const jobId = req.params.jobId;
@@ -164,6 +154,32 @@ async function run() {
                 res.send(true);
             } else {
                 res.send(false);
+            }
+        });
+
+        app.get("/api/jobs/search/:searchString", async (req, res) => {
+            const searchString = req.params.searchString;
+            if (searchString !== "null") {
+                const jobs = await database
+                    .collection("jobsCollection")
+                    .find({
+                        $or: [
+                            {
+                                jobTitle: {
+                                    $regex: searchString,
+                                    $options: "i",
+                                },
+                            },
+                        ],
+                    })
+                    .toArray();
+                res.send(jobs);
+            } else {
+                const jobs = await database
+                    .collection("jobsCollection")
+                    .find({})
+                    .toArray();
+                res.send(jobs);
             }
         });
 

@@ -129,6 +129,15 @@ async function run() {
             res.send(job);
         });
 
+        //add user applied job
+        app.post("/api/user/jobs", verufyToken, async (req, res) => {
+            const userJob = req.body;
+            const result = await database
+                .collection("userJobsCollection")
+                .insertOne(userJob);
+            res.send(result);
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"

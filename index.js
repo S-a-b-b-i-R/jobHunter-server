@@ -1,19 +1,18 @@
 const express = require("express");
 const cors = require("cors");
-const app = express();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
+const app = express();
 const port = process.env.PORT || 5000;
-
 //middleware
 app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://car-doctor-819e5.web.app",
-            "https://car-doctor-819e5.firebaseapp.com",
+            "https://job-hunter-cb240.web.app",
+            "https://job-hunter-cb240.firebaseapp.com",
         ],
         credentials: true,
     })
@@ -65,10 +64,14 @@ async function run() {
         });
 
         app.post("/api/auth/logout", async (req, res) => {
-            await res.clearCookie("token", {
+            const user = req.body;
+            console.log("logging out", user);
+            res.clearCookie("token", {
                 maxAge: 0,
-            });
-            res.send({ success: true });
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            }).send({ success: true });
         });
 
         app.get("/api/jobs/categories", async (req, res) => {
@@ -81,7 +84,6 @@ async function run() {
 
         app.post("/api/jobs", verufyToken, async (req, res) => {
             const job = req.body;
-            //change job keys
             const result = await database
                 .collection("jobsCollection")
                 .insertOne(job);
@@ -140,7 +142,6 @@ async function run() {
             } catch (error) {
                 console.log(error);
             }
-
             res.send(result);
         });
 

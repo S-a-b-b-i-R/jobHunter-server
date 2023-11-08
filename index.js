@@ -192,12 +192,20 @@ async function run() {
             res.send(jobs);
         });
 
-        //delete job from jobsCollection, verify token
         app.delete("/api/jobs/:id", verufyToken, async (req, res) => {
             const id = req.params.id;
             const result = await database
                 .collection("jobsCollection")
                 .deleteOne({ _id: new ObjectId(id) });
+            res.send(result);
+        });
+
+        app.put("/api/jobs/:id", verufyToken, async (req, res) => {
+            const id = req.params.id;
+            const job = req.body;
+            const result = await database
+                .collection("jobsCollection")
+                .updateOne({ _id: new ObjectId(id) }, { $set: { ...job } });
             res.send(result);
         });
 

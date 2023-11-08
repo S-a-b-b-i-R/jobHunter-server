@@ -209,6 +209,19 @@ async function run() {
             res.send(result);
         });
 
+        app.get(
+            "/api/user/appliedjobs/:userId",
+            verufyToken,
+            async (req, res) => {
+                const userId = req.params.userId;
+                const jobs = await database
+                    .collection("userJobsCollection")
+                    .find({ userId: userId })
+                    .toArray();
+                res.send(jobs);
+            }
+        );
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"

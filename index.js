@@ -183,6 +183,24 @@ async function run() {
             }
         });
 
+        app.get("/api/user/jobs/:userId", async (req, res) => {
+            const userId = req.params.userId;
+            const jobs = await database
+                .collection("jobsCollection")
+                .find({ uid: userId })
+                .toArray();
+            res.send(jobs);
+        });
+
+        //delete job from jobsCollection, verify token
+        app.delete("/api/jobs/:id", verufyToken, async (req, res) => {
+            const id = req.params.id;
+            const result = await database
+                .collection("jobsCollection")
+                .deleteOne({ _id: new ObjectId(id) });
+            res.send(result);
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"
